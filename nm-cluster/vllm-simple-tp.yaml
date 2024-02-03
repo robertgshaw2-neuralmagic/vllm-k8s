@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-service
+  labels:
+    app: vllm
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  selector:
+    app: vllm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-deployment
+  labels:
+    app: vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels: 
+        app: vllm
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        operator: Equal
+        value: "gpu"
+        key: "nodetype"
+      nodeSelector:
+        nodetype: gpu
+        gpuspecs: A100_40GB
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai
+        imagePullPolicy: Always
+        env:
+        - name: HF_HOME
+          value: "/network/rshaw/hf_cache"
+        args: ["--model", "HuggingFaceH4/zephyr-7b-beta", "--tensor-parallel-size", "2", "--dtype", "float16", "--enforce-eager", "--disable-log-requests"]
+        resources:
+          limits:
+            memory: "16G"
+            cpu: "4"
+            nvidia.com/gpu: 2
+        ports:
+          - containerPort: 8000
+        volumeMounts:
+        - name: shared-network-drive
+          mountPath: "/network"
+        - name: dshm 
+          mountPath: "/dev/shm"
+      volumes:
+      - name: shared-network-drive
+        nfs: 
+          server: storage-gateway.wisp.internal.neuralmagic.com
+          path: /on-prem-storage-gw
+      - name: dshm 
+        emptyDir:
+          medium: Memory
+
