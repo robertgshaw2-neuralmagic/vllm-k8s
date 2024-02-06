@@ -8,4 +8,4 @@ COPY download_model.py download_model.py
 
 RUN python3 download_model.py --model-id "HuggingFaceH4/zephyr-7b-beta" --ignore-patterns "*.bin"
 
-RUN ["/bin/bash"]
+ENTRYPOINT ["python3", "-m", "vllm.entrypoints.openai.api_server", "--model", "HuggingFaceH4/zephyr-7b-beta"]

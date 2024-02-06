@@ -54,16 +54,27 @@ gcloud container clusters get-credentials ${CLUSTER_NAME} --region ${REGION} --p
 ```
 
 
-
-
-
-
 ### Make A Container
 
 Next, we will make a container with vLLM to run Hugging Face's
 
 ```bash
-
+export REPO_ID=vllm-images
+gcloud artifacts repositories create ${REPO_ID} --repository-format=docker --location=${REGION} --description="vLLM Docker Images"
 ```
-gcloud artifacts repositories create quickstart-docker-repo --repository-format=docker \
---location=us-central1 --description="Docker repository"
+
+```bash
+gcloud auth configure-docker ${REGION}-docker.pkg.dev
+```
+
+```bash
+export IMAGE_NAME=vllm-zephyr
+export IMAGE_TAG=v0.0
+
+docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_ID}/${IMAGE_NAME}:${IMAGE_TAG}
+```
+
+```bash
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_ID}/${IMAGE_NAME}:${IMAGE_TAG}
+```
