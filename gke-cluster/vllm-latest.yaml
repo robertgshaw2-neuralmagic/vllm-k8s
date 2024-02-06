@@ -39,7 +39,7 @@ metadata:
     app.kubernetes.io/part-of: backend
     app.kubernetes.io/managed-by: helm
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: vllm-0
@@ -55,8 +55,8 @@ spec:
     spec:
       containers:
       - name: vllm-pod
-        image: vllm/vllm-openai
-        args: ["--model", "HuggingFaceH4/zephyr-7b-beta", "--tensor-parallel-size", "1", "--dtype", "float16", "--enforce-eager", "--disable-log-requests"]
+        image: us-central1-docker.pkg.dev/sandbox-377216/vllm-images/vllm-zephyr@sha256:bfb1ec0c89e11d7bb5310fae3c973b9af0603a1a150fceb5158efb9f2ba1850e
+        args: ["--tensor-parallel-size", "1", "--disable-log-requests", "--max-model-len", "4096"]
         resources:
           limits:
             nvidia.com/gpu: 1
