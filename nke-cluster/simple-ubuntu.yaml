@@ -29,13 +29,8 @@ spec:
       labels: 
         app: vllm
     spec:
-      tolerations:
-      - effect: NoSchedule
-        operator: Equal
-        value: 1
-        key: "nvidia.com/count"
       nodeSelector:
-        nvidia.com/count: 1
+        nvidia.com/gpu.family: "pascal"
       containers:
       - name: vllm
         image: ubuntu
