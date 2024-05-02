@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-service
+  labels:
+    app: vllm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+  selector:
+    app: vllm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-deployment
+  labels:
+    app: vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels: 
+        app: vllm
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        operator: Equal
+        value: "gpu"
+        key: "nodetype"
+      nodeSelector:
+        nodetype: gpu
+        gpuspecs: A5000_24GB
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai
+        env:
+        - name: HF_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: hf-token
+        args: ["--model", "meta-llama/Meta-Llama-3-8B-Instruct", "--enforce-eager", "--disable-log-requests"]
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "16G"
+            cpu: "4"
+            nvidia.com/gpu: 1
+        ports:
+          - containerPort: 8000
+        volumeMounts:
+        - name: dshm 
+          mountPath: "/dev/shm"
+      volumes:
+      - name: dshm 
+        emptyDir:
+          medium: Memory
