@@ -33,7 +33,7 @@ spec:
         nvidia.com/gpu.family: "pascal"
       containers:
       - name: vllm
-        image: ubuntu
+        image: nvidia/cuda:12.1.0-devel-ubuntu22.04
         env:
         - name: HF_TOKEN
           valueFrom:
