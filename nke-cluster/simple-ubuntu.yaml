@@ -33,7 +33,7 @@ spec:
         nvidia.com/gpu.family: "pascal"
       containers:
       - name: vllm
-        image: 498127099666.dkr.ecr.us-east-1.amazonaws.com/mlops/k8s-engine-dev-ssh-tmp:latest
+        image: nvidia/cuda:12.1.0-devel-ubuntu22.04
         args: ["tail", "-f", "/dev/null"]
         env:
         - name: HF_TOKEN
