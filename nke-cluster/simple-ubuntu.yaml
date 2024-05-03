@@ -44,8 +44,8 @@ spec:
         imagePullPolicy: Always
         resources:
           limits:
-            memory: "100G"
-            cpu: "32"
+            memory: "32G"
+            cpu: "16"
             nvidia.com/gpu: 1
         ports:
           - containerPort: 8000
