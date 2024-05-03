@@ -34,7 +34,7 @@ spec:
       containers:
       - name: vllm
         image: 498127099666.dkr.ecr.us-east-1.amazonaws.com/mlops/k8s-engine-dev-ssh-tmp:latest
-        entrypoint: ["tail", "-f", "/dev/null"]
+        args: ["tail", "-f", "/dev/null"]
         env:
         - name: HF_TOKEN
           valueFrom:
