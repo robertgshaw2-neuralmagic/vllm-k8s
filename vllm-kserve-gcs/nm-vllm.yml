@@ -10,17 +10,6 @@ spec:
   containers:
     - name: kserve-container
       image: vllm/vllm-openai
-      # command: ["python3", "-m", "vllm.entrypoints.api_server"]
-      args:
-        - "--model" 
-        - "meta-llama/Meta-Llama-3-8B" 
-        - "--disable-log-requests"
-      env:
-        - name: HF_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: hf-token
-              key: hf-token
       ports:
         - containerPort: 8000
           protocol: TCP
@@ -48,3 +37,8 @@ spec:
       runtime: nm-vllm
       modelFormat:
         name: huggingface
+      storage:
+        key: gcs
+        path: models/TinyLlama/TinyLlama-1.1B-Chat-v1.0
+        parameters:
+          bucket: nm-vllm-models

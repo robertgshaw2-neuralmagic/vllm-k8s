@@ -1,7 +1,9 @@
 FROM python:3.10-slim-bookworm
 
-RUN apt update && apt install huggingface_hub[cli]
+RUN apt update
 
-COPY download_model.sh /run/download_model.sh
+RUN pip install huggingface_hub[cli]
 
-ENTRYPOINT [ "/bin/bash" ]
+COPY download_from_hub.sh /run/download_from_hub.sh
+
+ENTRYPOINT [ "bash", "/run/download_from_hub.sh" ]
