@@ -1,0 +1,49 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: nm-vllm
+spec:
+  supportedModelFormats:
+    - name: huggingface
+      version: "1"
+      autoSelect: true
+  containers:
+    - name: kserve-container
+      image: vllm/vllm-openai
+      args: 
+        - "--model" 
+        - "meta-llama/Meta-Llama-3-8B-Instruct" 
+        - "--disable-log-requests"
+      env:
+        - name: HF_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: hf-token
+      ports:
+        - containerPort: 8000
+          protocol: TCP
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 5
+        periodSeconds: 5
+      resources:
+        limits:
+          cpu: 4
+          memory: 16Gi
+          nvidia.com/gpu: 1
+  disabled: false
+  multiModel: false
+---
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: nm-vllm
+spec:
+  predictor:
+    model:
+      runtime: nm-vllm
+      modelFormat:
+        name: huggingface
