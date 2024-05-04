@@ -1,6 +1,6 @@
-## vLLM in GKE
+## vLLM in GKE w/ KServe
 
-This guide shows how to setup a GKE cluster and deploy vLLM in K8s.
+This guide shows how to setup a GKE cluster and deploy vLLM in K8s using KServe.
 
 ### Make a Cluster
 
@@ -45,38 +45,14 @@ gcloud container node-pools create ${POOL_NAME} \
     --min-nodes ${MIN_NODES} --max-nodes ${MAX_NODES} --num-nodes ${NUM_NODES}
 ```
 
-Connect to your cluster
+Point `kubectl` at your cluster.
 
 ```bash
 gcloud container clusters get-credentials ${CLUSTER_NAME} --region ${REGION} --project ${PROJECT_ID}
 ```
 
 
-### Make A Container
-
-Next, we will make a container with vLLM to run Hugging Face's
-
-```bash
-export REPO_ID=vllm-images
-gcloud artifacts repositories create ${REPO_ID} --repository-format=docker --location=${REGION} --description="vLLM Docker Images"
-```
-
-```bash
-gcloud auth configure-docker ${REGION}-docker.pkg.dev
-```
-
-```bash
-export IMAGE_NAME=vllm-zephyr
-export IMAGE_TAG=v0.0
-
-docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_ID}/${IMAGE_NAME}:${IMAGE_TAG}
-```
-
-```bash
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_ID}/${IMAGE_NAME}:${IMAGE_TAG}
-```
-
+### Deploy vLLM To Your Cluser with KServe
 
 Install KServe:
 ```bash
@@ -87,5 +63,26 @@ Set Secret:
 ```bash
 export HF_TOKEN={your_token}
 kubectl create secret generic hf-token --from-literal=hf-token="$HF_TOKEN"
+```
 
+Create your `ServingRuntime` and `InferenceService`
+```bash
+kubectl apply -f nm-vllm.yml
+```
+
+Install client reqs:
+```bash
+python -m venv client-env
+source client-env/bin/activate
+pip install openai
+```
+
+Send a request:
+
+```bash
+SERVICE_HOSTNAME=$(kubectl get inferenceservice nm-vllm -n default -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+python3 sample-client.py --prompt "vLLM is the best inference server for LLMs because"
 ```
