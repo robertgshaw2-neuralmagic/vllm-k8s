@@ -10,9 +10,10 @@ spec:
   containers:
     - name: kserve-container
       image: vllm/vllm-openai
-      args: 
+      # command: ["python3", "-m", "vllm.entrypoints.api_server"]
+      args:
         - "--model" 
-        - "meta-llama/Meta-Llama-3-8B-Instruct" 
+        - "meta-llama/Meta-Llama-3-8B" 
         - "--disable-log-requests"
       env:
         - name: HF_TOKEN
