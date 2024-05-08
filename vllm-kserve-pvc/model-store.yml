@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: creation-pv-rw
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/mnt"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: creation-pv-rw-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: model-store-pod
+spec:
+  volumes:
+    - name: model-store
+      persistentVolumeClaim:
+        claimName: creation-pv-rw-claim
+  containers:
+    - name: model-store
+      image: python:3.10-slim-bookworm
+      command: [ "sleep" ]
+      args: [ "infinity" ]
+      volumeMounts:
+        - mountPath: "/pv"
+          name: model-store
+      resources:
+        limits:
+          memory: "1Gi"
+          cpu: "1"
