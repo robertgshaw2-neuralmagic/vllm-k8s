@@ -1,8 +1,8 @@
 # Script to enable Modelcars
 # Fetch the current storageInitializer configuration
 config=$(kubectl get configmap inferenceservice-config -n kserve -o jsonpath='{.data.storageInitializer}')
-# Enable modelcars and set the UID for the containers to run (required for minikube)
-newValue=$(echo $config | jq -c '. + {"enableModelcar": true, "uidModelcar": 1010}')
+# Enable modelcars and set the UID for the containers
+newValue=$(echo $config | jq -c '. + {"enableModelcar": true, "uidModelcar": 0}')
 
 echo $newValue
 # Create a temporary directory for the patch file

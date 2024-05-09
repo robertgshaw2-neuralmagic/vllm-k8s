@@ -76,32 +76,15 @@ pip install -r requirements.txt
 bash ./enable_oci.sh
 ```
 
-### Create a vLLM `ServingRuntime`
+### Deploy vLLM
 
 ```bash
 kubectl apply -f serving-runtime.yml
 ```
 
-
-
-
-
-
-
-
-Configure KServe To Use ModelCars:
+Deploy a vLLM Infernece 
 ```bash
-bash ./enable_oci.sh
-```
-
-Create vLLM ServingRuntime:
-```bash
-kubectl apply -f serving-runtime.yml
-```
-
-Create vLLM InferenceService:
-```bash
-kubectl apply -f serving-runtime.yml
+kubectl apply -f inference-service.yml
 ```
 
 

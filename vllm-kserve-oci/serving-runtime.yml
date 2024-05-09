@@ -10,8 +10,10 @@ spec:
   containers:
     - name: kserve-container
       image: vllm/vllm-openai:v0.4.2
-      command: ["sleep"]
-      args: [ "infinity" ]
+      args:
+        - --model
+        - /mnt/models
+        - --disable-log-requests
       ports:
         - containerPort: 8000
           protocol: TCP
