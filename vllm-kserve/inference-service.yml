@@ -1,0 +1,23 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: tinyllama
+  annotations:
+    serving.kserve.io/enable-prometheus-scraping: "true"
+spec:
+  predictor:
+    model:
+      runtime: nm-vllm
+      modelFormat:
+        name: huggingface
+      args: [ "--model", "/mnt/models"]
+      storageUri: "oci://robertgouldshaw2/tinyllama:1.0"
+      resources:
+        limits:
+          cpu: "6"
+          memory: 12Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "6"
+          memory: 12Gi
+          nvidia.com/gpu: "1"
