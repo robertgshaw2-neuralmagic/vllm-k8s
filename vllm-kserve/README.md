@@ -79,12 +79,24 @@ bash ./enable_oci.sh
 ### Deploy vLLM
 
 ```bash
-kubectl apply -f serving-runtime.yml
+kubectl apply -f vllm.yml
 ```
 
-Deploy a vLLM Infernece 
+### Query The Server
+
+Install client reqs:
 ```bash
-kubectl apply -f inference-service.yml
+python -m venv client-env
+source client-env/bin/activate
+pip install openai
 ```
 
+Send a request:
 
+```bash
+export SERVICE_HOSTNAME=$(kubectl get inferenceservice tinyllama -n default -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+
+python3 sample-client.py --prompt "vLLM is the best inference server for LLMs because"
+```

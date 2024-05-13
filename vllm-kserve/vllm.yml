@@ -1,0 +1,59 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: nm-vllm
+spec:
+  annotations:
+    prometheus.kserve.io/port: "8000"
+    prometheus.kserve.io/path: "/metrics"
+  supportedModelFormats:
+    - name: huggingface
+      version: "1"
+      autoSelect: true
+      priority: 1
+  protocolVersions:
+    - v2
+    - v1
+  containers:
+    - name: kserve-container
+      image: vllm/vllm-openai:v0.4.2
+      ports:
+        - containerPort: 8000
+          protocol: TCP
+      resources:
+        requests:
+          cpu: "1"
+          memory: 2Gi
+        limits:
+          cpu: "1"
+          memory: 2Gi
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        failureThreshold: 1
+        periodSeconds: 10
+---
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: tinyllama
+  annotations:
+    serving.kserve.io/enable-prometheus-scraping: "true"
+spec:
+  predictor:
+    model:
+      runtime: nm-vllm
+      modelFormat:
+        name: huggingface
+      args: [ "--model", "/mnt/models"]
+      storageUri: "oci://robertgouldshaw2/tinyllama:1.0"
+      resources:
+        limits:
+          cpu: "6"
+          memory: 12Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "6"
+          memory: 12Gi
+          nvidia.com/gpu: "1"
