@@ -23,7 +23,7 @@ gcloud container clusters create ${CLUSTER_NAME} \
 Next, add a `nodepool` with GPUs (in this case, we use L4s):
 
 ```bash
-export POOL_NAME=my-gpu-nodepool
+export POOL_NAME=my-gpu-nodepool-1x
 export NUM_GPUS_PER_NODE=1
 export GPU_TYPE=nvidia-l4
 export GPU_MACHINE_TYPE=g2-standard-8
