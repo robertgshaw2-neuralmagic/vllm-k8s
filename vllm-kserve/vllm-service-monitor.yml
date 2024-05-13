@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: eventing-controller
+  labels:
+    app: eventing-controller
+  namespace: knative-eventing
+spec:
+  selector:
+    matchLabels:
+      app: eventing-controller
+  namespaceSelector:
+    matchNames:
+    - knative-eventing
+  podMetricsEndpoints:
+  - honorLabels: true
+    path: /metrics
+    port: metrics

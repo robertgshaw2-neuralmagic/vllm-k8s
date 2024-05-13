@@ -100,3 +100,21 @@ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -
 
 python3 sample-client.py --prompt "vLLM is the best inference server for LLMs because"
 ```
+
+### Configure Prometheus
+
+- https://kserve.github.io/website/0.10/modelserving/observability/prometheus_metrics/
+- https://knative.dev/development/serving/observability/metrics/collecting-metrics/
+
+Install Prometheus Stack:
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack -n default -f prom_values.yml
+```
+
+Apply ServiceMonitor:
+```bash
+kubectl create namespace knative-eventing
+kubectl apply -f https://raw.githubusercontent.com/knative-extensions/monitoring/main/servicemonitor.yaml
+```
