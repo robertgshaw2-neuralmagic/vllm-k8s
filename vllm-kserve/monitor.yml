@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: tinyllama-monitoring
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      serving.kserve.io/inferenceservice: tinyllama
+  podMetricsEndpoints:
+  - targetPort: 8000
+    interval: 5s
