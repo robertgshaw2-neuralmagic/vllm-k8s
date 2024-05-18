@@ -1,5 +1,5 @@
 import argparse
-import os
+import os, time
 from openai import OpenAI
 
 parser = argparse.ArgumentParser()
@@ -24,10 +24,14 @@ models = client.models.list()
 model = models.data[0].id
 prompt = parser.parse_args().prompt
 
-# Completion API
-completion = client.completions.create(
-    model=model,
-    prompt=prompt)
+for _ in range(10000):
+    # Completion API
+    completion = client.completions.create(
+        model=model,
+        prompt=prompt)
+    time.sleep(1.0)
+    print("---")
+    print(f"Prompt: {prompt}")
+    print(f"Completion: {completion.choices[0].text}")
 
-print(f"Prompt: {prompt}")
-print(f"Completion: {completion.choices[0].text}")
+

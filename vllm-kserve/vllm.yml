@@ -39,6 +39,7 @@ kind: InferenceService
 metadata:
   name: tinyllama
   annotations:
+    serving.kserve.io/enable-metric-aggregation: "true"
     serving.kserve.io/enable-prometheus-scraping: "true"
 spec:
   predictor:
@@ -46,7 +47,7 @@ spec:
       runtime: nm-vllm
       modelFormat:
         name: huggingface
-      args: [ "--model", "/mnt/models"]
+      args: [ "--model", "/mnt/models", "--disable-log-requests"]
       storageUri: "oci://robertgouldshaw2/tinyllama:1.0"
       resources:
         limits:

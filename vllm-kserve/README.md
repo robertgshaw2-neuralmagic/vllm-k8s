@@ -105,6 +105,8 @@ python3 sample-client.py --prompt "vLLM is the best inference server for LLMs be
 
 - https://kserve.github.io/website/0.10/modelserving/observability/prometheus_metrics/
 - https://knative.dev/development/serving/observability/metrics/collecting-metrics/
+- https://github.com/kserve/kserve/blob/master/qpext/README.md
+- https://github.com/knative-extensions/monitoring/tree/main/grafana
 
 Install Prometheus Stack:
 ```bash
@@ -117,4 +119,10 @@ Apply ServiceMonitor:
 ```bash
 kubectl create namespace knative-eventing
 kubectl apply -f https://raw.githubusercontent.com/knative-extensions/monitoring/main/servicemonitor.yaml
+```
+
+Save this file as `qpext_image_patch.yaml`:
+```bash
+data:
+  queue-sidecar-image: kserve/qpext:latest
 ```
