@@ -9,5 +9,5 @@ spec:
     matchLabels:
       serving.kserve.io/inferenceservice: tinyllama
   podMetricsEndpoints:
-  - targetPort: 8000
+  - port: user-port
     interval: 5s
