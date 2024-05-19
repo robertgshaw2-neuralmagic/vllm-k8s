@@ -1,7 +1,3 @@
-# flake8: noqa
-# UPSTREAM SYNC: noqa is required for passing ruff run on nm-automation
-# This file has been modified by Neural Magic
-
 import json
 import os
 import sys
@@ -15,6 +11,7 @@ from tqdm.asyncio import tqdm
 
 AIOHTTP_TIMEOUT = aiohttp.ClientTimeout(total=6 * 60 * 60)
 
+SERVICE_HOSTNAME = os.environ["SERVICE_HOSTNAME"]
 
 @dataclass
 class RequestFuncInput:
@@ -59,9 +56,9 @@ async def async_request_openai_completions(
             "stream": True,
         }
         headers = {
-            "Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY')}"
+            "Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY')}",
+            "Host": SERVICE_HOSTNAME,
         }
-
         output = RequestFuncOutput()
         output.prompt_len = request_func_input.prompt_len
 

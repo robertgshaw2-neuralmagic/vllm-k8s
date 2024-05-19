@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+import os
 import random
 from typing import AsyncGenerator, List, Tuple
 
@@ -12,6 +13,9 @@ from openai import OpenAI
 from tqdm.asyncio import tqdm
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
+INGRESS_HOST = os.environ["INGRESS_HOST"]
+INGRESS_PORT = os.environ["INGRESS_PORT"]
+SERVICE_HOSTNAME = os.environ["SERVICE_HOSTNAME"]
 
 def sample_sharegpt_requests(
     dataset_path: str,
@@ -124,18 +128,21 @@ def main(args: argparse.Namespace):
 
     backend = "openai"
 
-    base_url = f"http://{args.host}:{args.port}/v1"
+    base_url = f"http://{INGRESS_HOST}:{INGRESS_PORT}/v1"
     api_url = f"{base_url}/completions"
 
     client = OpenAI(
         # defaults to os.environ.get("OPENAI_API_KEY")
         api_key="NULL",
         base_url=base_url,
+        default_headers={
+            "Host": SERVICE_HOSTNAME,
+        }
     )
 
     models = client.models.list()
     model_id = models.data[0].id
-    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", trust_remote_code=True)
 
     input_requests = sample_sharegpt_requests(
         dataset_path=args.dataset_path,
