@@ -1,0 +1,58 @@
+# pvc-pod-demo.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-from-snapshot
+spec:
+  dataSource:
+    apiGroup: snapshot.storage.k8s.io
+    kind: VolumeSnapshot
+    name: my-snapshot
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: standard-rwo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  labels:
+    app: vllm
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Exists"
+          effect: "PreferNoSchedule"
+      containers:
+      - name: vllm
+        image: python:3.11-slim-bookworm
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+        - mountPath: /mnt
+          name: my-volume
+          readOnly: true
+        resources:
+          limits:
+            cpu: 8
+            memory: 2Gi
+          requests:
+            cpu: 8
+            memory: 2Gi
+      volumes:
+      - name: my-volume
+        persistentVolumeClaim:
+          claimName: pvc-from-snapshot
+          readOnly: true

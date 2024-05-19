@@ -3,12 +3,11 @@
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -m <MODEL_NAME>"
-   echo "Usage: $0 -d <DESTINATION>"
+   echo "Usage: $0 -m <MODEL_NAME> -d <DESTINATION>"
    exit 1 # Exit script after printing help
 }
 
-while getopts ":m:" opt;
+while getopts ":m:d:" opt;
 do
    case "$opt" in
         m ) repo_id="$OPTARG" ;;
@@ -34,3 +33,4 @@ echo ""
 echo "Running: $cmd"
 echo ""
 $cmd
+echo "Done!"

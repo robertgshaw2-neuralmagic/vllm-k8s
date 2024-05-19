@@ -1,0 +1,37 @@
+# pvc-pod-demo.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: standard-rwo
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-demo
+spec:
+  volumes:
+    - name: pvc-demo-vol
+      persistentVolumeClaim:
+       claimName: pvc-demo
+  containers:
+    - name: pod-demo
+      image: python:3.11-slim-bookworm
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]
+      resources:
+        limits:
+          cpu: 2
+          memory: 2Gi
+        requests:
+          cpu: 2
+          memory: 2Gi
+      volumeMounts:
+        - mountPath: "/mnt"
+          name: pvc-demo-vol

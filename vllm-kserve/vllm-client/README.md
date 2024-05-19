@@ -18,7 +18,3 @@ export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
 python3 client.py --dataset-path ShareGPT_V3_unfiltered_cleaned_split.json --request-rate 1.0
 ```
-
-
-
-curl -v -H "Host: ${SERVICE_HOSTNAME}" -H "Content-Type: application/json" "http://${INGRESS_HOST}:${INGRESS_PORT}/v1/completions" -d @./iris-input.json
