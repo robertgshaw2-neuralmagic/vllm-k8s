@@ -24,7 +24,7 @@ function make_download_cmd()
         helpFunction
     fi
 
-    cmd+=" --local-dir models/$repo_id --cache-dir models/$repo_id --exclude *.pt"
+    cmd+=" --local-dir models/$repo_id --cache-dir models/$repo_id --exclude *.pt*"
 }
 
 make_download_cmd
