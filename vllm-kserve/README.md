@@ -65,9 +65,25 @@ For more detailed installation instructions, [checkout the docs](https://kserve.
 
 Install Reqs To Download Model:
 ```bash
-python -m venv env
-source env/bin/activate
-pip install -r requirements.txt
+python -m venv download-env
+source download-env/bin/activate
+pip install -r requirements-download.txt
+```
+
+Download Model From Hub:
+```bash
+export HF_TOKEN={your_token}
+bash download_from_hub.sh -m meta-llama/Meta-Llama-3-8B-Instruct
+```
+
+Add model to OCI image:
+```bash
+docker build --build-arg="MODEL_PATH=$PWD/models/meta-llama/Meta-Llama-3-8B-Instruct" -t robertgouldshaw2/llama-3:v0.1 .
+```
+
+Push OCI image to docker hub:
+```bash
+docker push robertgouldshaw2/llama-3:v0.1
 ```
 
 ### Enable OCI in KServe

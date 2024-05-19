@@ -37,7 +37,7 @@ spec:
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: tinyllama
+  name: llama-3
   annotations:
     serving.kserve.io/enable-metric-aggregation: "true"
     serving.kserve.io/enable-prometheus-scraping: "true"
@@ -47,8 +47,13 @@ spec:
       runtime: nm-vllm
       modelFormat:
         name: huggingface
-      args: [ "--model", "/mnt/models", "--disable-log-requests"]
-      storageUri: "oci://robertgouldshaw2/tinyllama:1.0"
+      args:
+        - "--model"
+        - "/mnt/model"
+        - "--served-model-name"
+        - "llama-3"
+        - "--disable-log-requests"
+      storageUri: "oci://robertgouldshaw2/llama-3:v0.1"
       resources:
         limits:
           cpu: "6"
@@ -58,3 +63,17 @@ spec:
           cpu: "6"
           memory: 12Gi
           nvidia.com/gpu: "1"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: llama-3-podmonitor
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      serving.kserve.io/inferenceservice: llama-3
+  podMetricsEndpoints:
+  - port: user-port
+    interval: 5s
