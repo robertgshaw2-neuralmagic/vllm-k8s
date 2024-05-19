@@ -67,7 +67,7 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: llama-3-podmonitor
+  name: llama-3-monitor
 spec:
   namespaceSelector:
     any: true

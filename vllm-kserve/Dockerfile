@@ -1,5 +1,5 @@
 ARG MODEL_PATH
 
 FROM busybox
-RUN mkdir /models && chmod 775 /models
+RUN mkdir /model && chmod 775 /model
 COPY ${MODEL_PATH} /model/
