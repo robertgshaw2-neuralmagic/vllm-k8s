@@ -1,0 +1,37 @@
+# downloader-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: downloader-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: premium-rwo
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: downloader-pod
+spec:
+  volumes:
+    - name: model-vol
+      persistentVolumeClaim:
+       claimName: downloader-pvc
+  containers:
+    - name: pod-demo
+      image: python:3.11-slim-bookworm
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]
+      resources:
+        limits:
+          cpu: 2
+          memory: 2Gi
+        requests:
+          cpu: 2
+          memory: 2Gi
+      volumeMounts:
+        - mountPath: "/mnt"
+          name: model-vol
