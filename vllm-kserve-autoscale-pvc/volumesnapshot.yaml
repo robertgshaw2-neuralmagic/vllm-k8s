@@ -1,4 +1,11 @@
 apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: my-snapshotclass
+driver: pd.csi.storage.gke.io
+deletionPolicy: Delete
+---
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
 metadata:
   name: downloader-pvc-snapshot

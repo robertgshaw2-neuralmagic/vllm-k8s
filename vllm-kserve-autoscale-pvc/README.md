@@ -1,42 +1,42 @@
-### Load model into a PVC
+# vLLM + KServe
 
-Create a PVC and pod that we can use to download a model onto the cluster.
+In this example, we will demonstrate how to run vLLM with:
+- KServe / KNative
+- Prometheus/Grafana Telemetry
+- Concurrency-based Autoscaling
+- `ReadOnlyMany` PVC for low cold-start times
+
+This tutorial assumes you have KServe and Prometheus Operator Installed.
+
+## Add Model To The Cluster
+
+Given the size of we recommend pre-downloading your model artifacts into a PVC that can be 
+mounted to all nodes via `ReadOnlyMany`.
+
+### Save Model to a PVC
+
+Create a pod and a `ReadWriteOnce` PVC to download the model:
 
 ```bash
-kubectl apply -f downloader-pvc.yaml
-```
-
-We can see that the PVC is created where we will store the model:
-
-```bash
-kubectl get pvc
-
->> NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
->> downloader-pvc   Bound    pvc-2daf80b8-cb56-4e5d-bcbb-042143300bfc   30Gi       RWO            premium-rwo    92s
+kubectl apply -f pvc_download.yaml
 ```
 
 Exec into the pod and download:
-
 ```bash
+kubcetl cp download_llama.sh downloader-pod:/home
 kubectl exec -it downloader-pod -- bash
 ```
 
 Download a model:
-
 ```bash
-export HF_TOKEN=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
-python3 -m venv env
-source env/bin/activate
-pip install huggingface_hub[cli]
-export MODEL_ID=meta-llama/Meta-Llama-3-8B-Instruct
-huggingface-cli download $MODEL_ID --local-dir /mnt/$MODEL_ID --cache-dir /mnt/$MODEL_ID --exclude *.pt*
-exit
+bash /home/download_llama.sh
 ```
 
-Snapshot the volume so we can load it as a `ReadOnlyMany` PVC that can be mounted on multiple nodes in the cluster.
+### Snapshot the Volume
+
+Next, snapshot the volume so we can load it as a `ReadOnlyMany` PVC.
 
 ```bash
-kubectl apply -f volumesnapshotclass.yaml
 kubectl apply -f volumesnapshot.yaml
 ```
 
@@ -50,60 +50,61 @@ kubectl get volumesnapshot \
 >> downloader-pvc-snapshot   true
 ```
 
-Create a PVC with `ReadOnlyMany` based on the snapshot. This will allow us to mount the PVC to each 
+
+### Create a ReadOnlyMany PVC From the Snapshot
+
+Create a PVC with `ReadOnlyMany` based on the snapshot. This allows the same PVC to be mounted to each node.
 
 ```bash
-kubectl apply -f runtime_pvc.yaml
+kubectl apply -f pvc_runtime.yaml
 ```
 
+## Deploy vLLM
 
-### Deploy vLLM
+### Launch InferneceService
+
+Now, we can deploy a vLLM `InferenceService` which uses:
+- `ReadOnlyMany` PVC
+- `Autoscaling` targeting concurrency of 8
 
 ```bash
-kubectl apply -f vllm.yml
+kubectl apply -f vllm.yaml
 ```
 
-### Query The Server
+### Launch Monitoring
+
+```bash
+kubectl apply -f vllm_monitoring.yaml
+```
+
+Note: this step assumes you already have Prometheus Operator running in your K8s Cluser.
+
+## Query The Server
 
 Install client reqs:
 ```bash
+cd vllm-client
 python -m venv client-env
 source client-env/bin/activate
-pip install openai
+pip install -r requirements.txt
 ```
 
-Send a request:
-
+Get endpoint:
 ```bash
-export SERVICE_HOSTNAME=$(kubectl get inferenceservice tinyllama -n default -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+export SERVICE_HOSTNAME=$(kubectl get inferenceservice llama-3 -n default -o jsonpath='{.status.url}' | cut -d "/" -f 3)
 export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
-
-python3 sample-client.py --prompt "vLLM is the best inference server for LLMs because"
 ```
 
-### Configure Prometheus
-
-- https://kserve.github.io/website/0.10/modelserving/observability/prometheus_metrics/
-- https://knative.dev/development/serving/observability/metrics/collecting-metrics/
-- https://github.com/kserve/kserve/blob/master/qpext/README.md
-- https://github.com/knative-extensions/monitoring/tree/main/grafana
-
-Install Prometheus Stack:
+Hit the server with load:
 ```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helm install prometheus prometheus-community/kube-prometheus-stack -n default -f prom_values.yml
+python3 client.py --dataset-path ShareGPT_V3_unfiltered_cleaned_split.json --request-rate 0.25 --num-prompts 100
 ```
 
-Apply ServiceMonitor:
+Hit the server with more load:
 ```bash
-kubectl create namespace knative-eventing
-kubectl apply -f https://raw.githubusercontent.com/knative-extensions/monitoring/main/servicemonitor.yaml
+python3 client.py --dataset-path ShareGPT_V3_unfiltered_cleaned_split.json --request-rate 1.0
 ```
 
-Save this file as `qpext_image_patch.yaml`:
-```bash
-data:
-  queue-sidecar-image: kserve/qpext:latest
-```
+Observe the metrics in Grafana.
+- http://localhost:3000/

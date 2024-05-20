@@ -46,7 +46,7 @@ spec:
         name: huggingface
       args:
         - "--model"
-        - "/mnt/models/models/meta-llama/Meta-Llama-3-8B-Instruct"
+        - "/mnt/models/meta-llama/Meta-Llama-3-8B-Instruct"
         - "--served-model-name"
         - "meta-llama/Meta-Llama-3-8B-Instruct"
         - "--disable-log-requests"
