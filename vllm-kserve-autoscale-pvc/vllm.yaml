@@ -43,8 +43,13 @@ metadata:
     serving.kserve.io/enable-prometheus-scraping: "true"
 spec:
   predictor:
+    scaleTarget: 8
+    scaleMetric: concurrency
+    minReplicas: 1
+    maxReplicas: 2
     model:
       runtime: nm-vllm
+      
       modelFormat:
         name: huggingface
       args:
