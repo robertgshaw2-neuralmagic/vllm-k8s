@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: llama-3-monitor
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      serving.kserve.io/inferenceservice: llama-3
+  podMetricsEndpoints:
+  - port: user-port
+    interval: 5s

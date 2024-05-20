@@ -20,13 +20,6 @@ spec:
       ports:
         - containerPort: 8000
           protocol: TCP
-      resources:
-        requests:
-          cpu: "1"
-          memory: 2Gi
-        limits:
-          cpu: "1"
-          memory: 2Gi
       readinessProbe:
         httpGet:
           path: /health
@@ -43,13 +36,12 @@ metadata:
     serving.kserve.io/enable-prometheus-scraping: "true"
 spec:
   predictor:
-    scaleTarget: 8
+    scaleTarget: 10
     scaleMetric: concurrency
     minReplicas: 1
     maxReplicas: 2
     model:
       runtime: nm-vllm
-      
       modelFormat:
         name: huggingface
       args:
@@ -61,24 +53,10 @@ spec:
       storageUri: "pvc://runtime-pvc"
       resources:
         limits:
-          cpu: "6"
-          memory: 12Gi
+          cpu: "4"
+          memory: 8Gi
           nvidia.com/gpu: "1"
         requests:
-          cpu: "6"
-          memory: 12Gi
+          cpu: "4"
+          memory: 8Gi
           nvidia.com/gpu: "1"
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: llama-3-monitor
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      serving.kserve.io/inferenceservice: llama-3
-  podMetricsEndpoints:
-  - port: user-port
-    interval: 5s
