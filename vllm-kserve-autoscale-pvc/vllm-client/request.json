@@ -1,0 +1,5 @@
+{
+    "model": "mnt/models/",
+    "prompt": request_func_input.prompt,
+}
+  
